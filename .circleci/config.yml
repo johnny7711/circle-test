@@ -1,4 +1,8 @@
 version: 2
+
+references:
+  cache_key: &cache_key v1-dependencies-{{ checksum "package.json" }}
+
 jobs:
   deploy_main:
     docker:
@@ -7,22 +11,20 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-              - v1-dependencies-{{ checksum "package.json" }}
-              - v1-dependencies-
+              - *cache_key
       - run:
           name: npm install
           command: npm i
       - save_cache:
           paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+              - node_modules
+          key: *cache_key
       - run:
           name: build project
           command: npm run build
       - run:
           name: Deploy firebase Hosting
           command: ./node_modules/.bin/firebase deploy --only hosting --token=$FIREBASE_TOKEN
-
 
 workflows:
   version: 2
